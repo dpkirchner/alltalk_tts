@@ -12,6 +12,7 @@ services:
       - ./voices:/app/voices/
       - ./finetune/put-voice-samples-in-here:/app/finetune/put-voice-samples-in-here
       - ./dockerconfig.json:/app/confignew.json
+      - ./.root-cache:/root/.cache
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:7851/api/ready"]
       interval: 1m30s
