@@ -102,7 +102,7 @@ def update_config(config_file_path, update_config_path, downgrade_config_path):
             print(f"[{params['branding']}Startup] \033[92mConfig file check      : \033[93mNo Updates required\033[0m")
 
     except Exception as e:
-        print(f"[{params['branding']}Startup] \033[92mConfig file check      : \033[91mError updating\033[0m")
+        print(f"[{params['branding']}Startup] \033[92mConfig file check      : \033[91mError updating: {str(e)}\033[0m")
 
 # Update the configuration
 update_config(config_file_path, update_config_path, downgrade_config_path)

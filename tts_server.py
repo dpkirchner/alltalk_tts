@@ -10,6 +10,7 @@ import io
 import wave
 import logging
 logging.disable(logging.WARNING)
+logger = logging.getLogger()
 ##########################
 #### Webserver Imports####
 ##########################
@@ -404,6 +405,7 @@ async def set_low_vram(request: Request, new_low_vram_value: bool):
                 params["low_vram"] = False
         return Response(content=json.dumps({"status": "lowvram-success"}))
     except Exception as e:
+        logger.exception(e)
         return Response(content=json.dumps({"status": "error", "message": str(e)}))
 
 
@@ -470,6 +472,7 @@ async def deepspeed(request: Request, new_deepspeed_value: bool):
         await handle_deepspeed_change(params["deepspeed_activate"])
         return Response(content=json.dumps({"status": "deepspeed-success"}))
     except Exception as e:
+        logger.exception(e)
         return Response(content=json.dumps({"status": "error", "message": str(e)}))
 
 
@@ -632,6 +635,7 @@ async def generate(request: Request):
             content={"status": "generate-success", "data": {"audio_path": output_file}}
         )
     except Exception as e:
+        logger.exception(e)
         return JSONResponse(content={"status": "error", "message": str(e)})
 
 
@@ -745,7 +749,7 @@ async def tts_demo_request_streaming(text: str, voice: str, language: str, outpu
         stream = await generate_audio(text, voice, language, temperature, repetition_penalty, output_file_path, streaming=True)
         return StreamingResponse(stream, media_type="audio/wav")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.exception(e)
         return JSONResponse(content={"error": "An error occurred"}, status_code=500)
 
 @app.post("/tts-demo-request", response_class=JSONResponse)
@@ -755,7 +759,7 @@ async def tts_demo_request(request: Request, text: str = Form(...), voice: str =
         await generate_audio(text, voice, language, temperature, repetition_penalty, output_file_path, streaming=False)
         return JSONResponse(content={"output_file_path": str(output_file)}, status_code=200)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.exception(e)
         return JSONResponse(content={"error": "An error occurred"}, status_code=500)
 
 
@@ -829,7 +833,7 @@ async def preview_voice(request: Request, voice: str = Form(...)):
             status_code=200,
         )
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.exception(e)
         return JSONResponse(content={"error": "An error occurred"}, status_code=500)
 
 ########################
@@ -854,7 +858,7 @@ async def tts_generate_streaming(text: str, voice: str, language: str, output_fi
         stream = await generate_audio(text, voice, language, temperature, repetition_penalty, output_file_path, streaming=True)
         return StreamingResponse(stream, media_type="audio/wav")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.exception(e)
         return JSONResponse(content={"error": "An error occurred"}, status_code=500)
 
 @app.post("/api/tts-generate-streaming", response_class=JSONResponse)
@@ -864,7 +868,7 @@ async def tts_generate_streaming(request: Request, text: str = Form(...), voice:
         await generate_audio(text, voice, language, temperature, repetition_penalty, output_file_path, streaming=False)
         return JSONResponse(content={"output_file_path": str(output_file)}, status_code=200)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.exception(e)
         return JSONResponse(content={"error": "An error occurred"}, status_code=500)
 
 @app.put("/api/stop-generation")
@@ -998,6 +1002,7 @@ def combine(output_file_timestamp, output_file_name, audio_files):
                 raise ValueError("Sample rates of input files are not consistent.")
     except Exception as e:
         # Handle exceptions (e.g., file not found, invalid audio format)
+        logger.exception(e)
         return None, None
     if output_file_timestamp:
         timestamp = int(time.time())
@@ -1015,6 +1020,7 @@ def combine(output_file_timestamp, output_file_name, audio_files):
             os.remove(audio_file)
     except Exception as e:
         # Handle exceptions (e.g., failed to write output file)
+        logger.exception(e)
         return None, None
     return output_file_path, output_file_url, output_cache_url
 
@@ -1142,6 +1148,7 @@ async def tts_generate(
             return StreamingResponse(response, media_type="audio/wav")
         return JSONResponse(content={"status": "generate-success", "output_file_path": str(output_file_path), "output_file_url": str(output_file_url), "output_cache_url": str(output_cache_url)}, status_code=200)
     except Exception as e:
+        logger.exception(e)
         return JSONResponse(content={"status": "generate-failure", "error": "An error occurred"}, status_code=500)
 
 
